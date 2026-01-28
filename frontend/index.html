@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GHOST_PROTOCOL // SECURE_CHANNEL</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Background Effects -->
+    <div class="bg-noise"></div>
+    <div class="bg-scanlines"></div>
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <div class="pulse-ring"></div>
+                    <div class="core"></div>
+                </div>
+                <div class="brand-text">
+                    <h1>GHOST<span class="dim">PROTOCOL</span></h1>
+                    <div class="status-indicator online">v2.0.4 // ONLINE</div>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-mode="inject">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                    </span>
+                    <span class="nav-text">ENCODE</span>
+                    <span class="nav-arrow">→</span>
+                </button>
+                <button class="nav-btn" data-mode="extract">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                    </span>
+                    <span class="nav-text">DECODE</span>
+                    <span class="nav-arrow">→</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sys-info">
+                    <div>MEM: <span id="mem-stat">--</span></div>
+                    <div>LAT: <span id="lat-stat">--</span>ms</div>
+                    <div>ENC: AES-256-GCM</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="workspace">
+            <!-- Header Bar -->
+            <header class="top-bar">
+                <div class="breadcrumbs">
+                    <span class="crumb">SYSTEM</span>
+                    <span class="separator">/</span>
+                    <span class="crumb active" id="current-mode-label">ENCODE_PAYLOAD</span>
+                </div>
+                <div class="action-status" id="global-status">IDLE</div>
+            </header>
+
+            <!-- Inject Workspace -->
+            <div id="inject-mode" class="mode-workspace active">
+                <div class="cols-2">
+                    <!-- Left Col: Configuration -->
+                    <div class="col-config">
+                        <section class="config-section">
+                            <h2 class="section-title">01 // PROTOCOL LEVEL</h2>
+                            <div class="stealth-selector-v2">
+                                <label class="stealth-card-v2 selected">
+                                    <input type="radio" name="injection-mode" value="ATTRIBUTE" checked>
+                                    <div class="card-content">
+                                        <div class="header">
+                                            <span class="badge">L1</span>
+                                            <span class="title">Standard Attribute</span>
+                                        </div>
+                                        <p class="desc">High-speed injection using custom bytecode attributes. Minimal
+                                            footprint.</p>
+                                    </div>
+                                    <div class="selection-indicator"></div>
+                                </label>
+                                <label class="stealth-card-v2">
+                                    <input type="radio" name="injection-mode" value="SBOX_SMEAR">
+                                    <div class="card-content">
+                                        <div class="header">
+                                            <span class="badge highlight">L2</span>
+                                            <span class="title">Ghost S-Box</span>
+                                        </div>
+                                        <p class="desc">Stealth-focused. Encodes payload as functional crypto tables to
+                                            evade heuristic scanners.</p>
+                                    </div>
+                                    <div class="selection-indicator"></div>
+                                </label>
+                            </div>
+                        </section>
+
+                        <section class="config-section">
+                            <h2 class="section-title">03 // ENCRYPTION</h2>
+                            <div class="input-group-v2">
+                                <div class="input-wrapper">
+                                    <input type="password" id="inject-passphrase" placeholder=" ">
+                                    <label>Passphrase</label>
+                                    <button class="toggle-vis-v2" data-target="inject-passphrase">👁</button>
+                                </div>
+                                <div class="helper-text">Key derivation: PBKDF2 (100k iters)</div>
+                            </div>
+                        </section>
+
+                        <div class="action-area">
+                            <button class="cyber-btn" id="inject-btn" disabled>
+                                <span class="btn-content">
+                                    <span class="glitch-text" data-text="INITIATE_SEQUENCE">INITIATE_SEQUENCE</span>
+                                </span>
+                                <div class="btn-glitch"></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Col: Assets -->
+                    <div class="col-assets">
+                        <h2 class="section-title">02 // ASSETS</h2>
+
+                        <div class="upload-stack">
+                            <!-- Payload Upload -->
+                            <div class="dropzone" id="payload-drop">
+                                <div class="dz-content">
+                                    <div class="dz-icon">📄</div>
+                                    <div class="dz-label">PAYLOAD</div>
+                                    <div class="dz-desc">Drop secret message/file</div>
+                                </div>
+                                <div class="dz-file hidden" id="payload-info">
+                                    <div class="file-icon">🔒</div>
+                                    <div class="file-details">
+                                        <div class="file-name" id="payload-name">secret.txt</div>
+                                        <div class="file-size" id="payload-size">12 KB</div>
+                                    </div>
+                                    <button class="file-remove" data-target="payload">×</button>
+                                </div>
+                                <div class="dz-overlay"></div>
+                            </div>
+
+                            <div class="connector-line">
+                                <div class="flow-arrow">▼</div>
+                            </div>
+
+                            <!-- Carrier Upload -->
+                            <div class="dropzone" id="carrier-drop">
+                                <div class="dz-content">
+                                    <div class="dz-icon">📦</div>
+                                    <div class="dz-label">CARRIER</div>
+                                    <div class="dz-desc">Drop target .class file</div>
+                                </div>
+                                <div class="dz-file hidden" id="carrier-info">
+                                    <div class="file-icon">☕</div>
+                                    <div class="file-details">
+                                        <div class="file-name" id="carrier-name">App.class</div>
+                                        <div class="file-size" id="carrier-size">4 KB</div>
+                                    </div>
+                                    <button class="file-remove" data-target="carrier">×</button>
+                                </div>
+                                <div class="dz-overlay"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extract Workspace -->
+            <div id="extract-mode" class="mode-workspace hidden">
+                <div class="center-stage">
+                    <section class="config-section">
+                        <h2 class="section-title">SOURCE_FILE</h2>
+                        <div class="dropzone large" id="modified-drop">
+                            <div class="dz-content">
+                                <div class="dz-icon">🕵️</div>
+                                <div class="dz-label">ANALYZE ARTIFACT</div>
+                                <div class="dz-desc">Drop suspicious .class file to attempt payload recovery</div>
+                            </div>
+                            <div class="dz-file hidden" id="modified-info">
+                                <div class="file-icon">📦</div>
+                                <div class="file-details">
+                                    <div class="file-name" id="modified-name">Infected.class</div>
+                                    <div class="file-size" id="modified-size">--</div>
+                                </div>
+                                <button class="file-remove" data-target="modified">×</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="config-section" style="margin-top: 2rem;">
+                        <h2 class="section-title">DECRYPTION_KEY</h2>
+                        <div class="input-group-v2">
+                            <div class="input-wrapper">
+                                <input type="password" id="extract-passphrase" placeholder=" ">
+                                <label>Passphrase</label>
+                                <button class="toggle-vis-v2" data-target="extract-passphrase">👁</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="action-area" style="margin-top: 3rem;">
+                        <button class="cyber-btn" id="extract-btn" disabled>
+                            <span class="btn-content">EXTRACT_PAYLOAD</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Output -->
+            <div class="terminal-overlay" id="terminal">
+                <div class="term-header">
+                    <span>TERMINAL_OUTPUT</span>
+                    <button id="term-close">_</button>
+                </div>
+                <div class="term-body" id="term-logs">
+                    <!-- Logs go here -->
+                </div>
+                <div class="term-actions hidden" id="result-actions">
+                    <a href="#" id="download-link" class="term-btn">DOWNLOAD_ARTIFACT</a>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/crypto.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

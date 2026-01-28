@@ -1,0 +1,40 @@
+# Build outputs
+target/
+build/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Maven
+.mvn/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tools (JDK, Maven downloads - too large for git)
+tools/
+*.zip
+*.tar.gz
+
+# Tools (JDK, Maven downloads - too large for git)
+tools/
+*.zip
+*.tar.gz
+
+# Internal
+AGENT_PROMPT.md
+docs/sprint-plan.md
+docs/workflow.md
+scripts/
+tests/
+setup_env.ps1
+
+# Logs
+*.log
