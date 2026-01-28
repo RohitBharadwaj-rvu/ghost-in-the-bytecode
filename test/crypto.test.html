@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost Crypto Tests</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .test {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+
+        .pass {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .running {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #summary {
+            font-size: 1.2em;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔐 Ghost Crypto Test Suite</h1>
+    <div id="tests"></div>
+    <div id="summary"></div>
+
+    <script src="../js/crypto.js"></script>
+    <script>
+        const testsDiv = document.getElementById('tests');
+        const summaryDiv = document.getElementById('summary');
+        let passed = 0;
+        let failed = 0;
+
+        function log(name, success, message = '') {
+            const div = document.createElement('div');
+            div.className = `test ${success ? 'pass' : 'fail'}`;
+            div.textContent = `${success ? '✅' : '❌'} ${name}${message ? ': ' + message : ''}`;
+            testsDiv.appendChild(div);
+            if (success) passed++; else failed++;
+        }
+
+        function arraysEqual(a, b) {
+            if (a.length !== b.length) return false;
+            for (let i = 0; i < a.length; i++) {
+                if (a[i] !== b[i]) return false;
+            }
+            return true;
+        }
+
+        async function runTests() {
+            testsDiv.innerHTML = '<div class="test running">Running tests...</div>';
+            await new Promise(r => setTimeout(r, 100));
+            testsDiv.innerHTML = '';
+
+            // Test 1: Roundtrip - text data
+            try {
+                const plaintext = GhostCrypto.stringToBytes('Hello, World!');
+                const passphrase = 'test-passphrase-123';
+                const encrypted = await GhostCrypto.encrypt(plaintext, passphrase);
+                const decrypted = await GhostCrypto.decrypt(encrypted, passphrase);
+                log('Roundtrip (text)', arraysEqual(plaintext, decrypted));
+            } catch (e) {
+                log('Roundtrip (text)', false, e.message);
+            }
+
+            // Test 2: Roundtrip - binary data (all byte values)
+            try {
+                const binaryData = new Uint8Array(256);
+                for (let i = 0; i < 256; i++) binaryData[i] = i;
+                const passphrase = 'binary-test';
+                const encrypted = await GhostCrypto.encrypt(binaryData, passphrase);
+                const decrypted = await GhostCrypto.decrypt(encrypted, passphrase);
+                log('Roundtrip (binary)', arraysEqual(binaryData, decrypted));
+            } catch (e) {
+                log('Roundtrip (binary)', false, e.message);
+            }
+
+            // Test 3: Empty data
+            try {
+                const empty = new Uint8Array(0);
+                const encrypted = await GhostCrypto.encrypt(empty, 'empty-test');
+                const decrypted = await GhostCrypto.decrypt(encrypted, 'empty-test');
+                log('Empty payload', decrypted.length === 0);
+            } catch (e) {
+                log('Empty payload', false, e.message);
+            }
+
+            // Test 4: Wrong passphrase throws
+            try {
+                const plaintext = GhostCrypto.stringToBytes('Secret data');
+                const encrypted = await GhostCrypto.encrypt(plaintext, 'correct-pass');
+                await GhostCrypto.decrypt(encrypted, 'wrong-pass');
+                log('Wrong passphrase throws', false, 'Should have thrown');
+            } catch (e) {
+                log('Wrong passphrase throws', true);
+            }
+
+            // Test 5: Same input produces different output (random IV/salt)
+            try {
+                const plaintext = GhostCrypto.stringToBytes('Same input');
+                const passphrase = 'same-pass';
+                const enc1 = await GhostCrypto.encrypt(plaintext, passphrase);
+                const enc2 = await GhostCrypto.encrypt(plaintext, passphrase);
+                const different = !arraysEqual(enc1, enc2);
+                log('Random IV/salt per encryption', different);
+            } catch (e) {
+                log('Random IV/salt per encryption', false, e.message);
+            }
+
+            // Test 6: Version byte is correct
+            try {
+                const encrypted = await GhostCrypto.encrypt(new Uint8Array([1, 2, 3]), 'test');
+                log('Version byte is 1', encrypted[0] === GhostCrypto.VERSION);
+            } catch (e) {
+                log('Version byte is 1', false, e.message);
+            }
+
+            // Test 7: Payload length is correct
+            try {
+                const plaintext = new Uint8Array(100);
+                const encrypted = await GhostCrypto.encrypt(plaintext, 'test');
+                // Expected: 1 (version) + 16 (salt) + 12 (iv) + 100 (data) + 16 (tag) = 145
+                const expectedMin = 1 + 16 + 12 + 100 + 16;
+                log('Payload length correct', encrypted.length === expectedMin);
+            } catch (e) {
+                log('Payload length correct', false, e.message);
+            }
+
+            // Test 8: Tampered ciphertext throws
+            try {
+                const plaintext = GhostCrypto.stringToBytes('Do not tamper');
+                const encrypted = await GhostCrypto.encrypt(plaintext, 'auth-test');
+                // Tamper with ciphertext
+                encrypted[encrypted.length - 10] ^= 0xFF;
+                await GhostCrypto.decrypt(encrypted, 'auth-test');
+                log('Tampered data throws', false, 'Should have thrown');
+            } catch (e) {
+                log('Tampered data throws', true);
+            }
+
+            // Test 9: Large payload (1MB)
+            try {
+                const large = new Uint8Array(1024 * 1024);
+                // Fill with deterministic pattern (getRandomValues has 65KB limit)
+                for (let i = 0; i < large.length; i++) {
+                    large[i] = i % 256;
+                }
+                const encrypted = await GhostCrypto.encrypt(large, 'large-test');
+                const decrypted = await GhostCrypto.decrypt(encrypted, 'large-test');
+                log('Large payload (1MB)', arraysEqual(large, decrypted));
+            } catch (e) {
+                log('Large payload (1MB)', false, e.message);
+            }
+
+            // Summary
+            const total = passed + failed;
+            summaryDiv.className = failed === 0 ? 'pass' : 'fail';
+            summaryDiv.textContent = `Tests: ${passed}/${total} passed`;
+        }
+
+        runTests();
+    </script>
+</body>
+
+</html>
