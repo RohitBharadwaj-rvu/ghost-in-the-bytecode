@@ -4,359 +4,521 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SRS - Ghost in the Bytecode</title>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+    <title>Software Requirements Specification - Ghost in the Bytecode</title>
     <style>
-        :root {
-            --font-main: 'Crimson Text', 'Times New Roman', serif;
-            --spacing-header: 1.5rem;
-            --spacing-paragraph: 1rem;
+        @page {
+            size: A4;
+            margin: 1in;
+
+            @top-left {
+                content: "Software Requirements Specification for Ghost in the Bytecode";
+                font-family: Arial, Helvetica, sans-serif;
+                font-style: italic;
+                text-decoration: underline;
+                font-size: 10pt;
+            }
+
+            @top-right {
+                content: "Page " counter(page);
+                font-family: Arial, Helvetica, sans-serif;
+                font-weight: bold;
+                font-size: 10pt;
+            }
         }
 
         body {
-            font-family: var(--font-main);
-            max-width: 8.5in;
-            margin: 0 auto;
-            padding: 1in;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12pt;
             line-height: 1.5;
             color: #000;
-            background: #fff;
+            margin: 0 auto;
+            max-width: 8.5in;
             counter-reset: section;
-            text-align: justify;
         }
 
-        /* Title Block */
-        .title-block {
-            text-align: center;
-            margin-bottom: 3rem;
+        /* Print Media Query for browser printing */
+        @media print {
+            body {
+                max-width: 100%;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            .header {
+                display: flex;
+                justify-content: space-between;
+                border-bottom: 1px solid #000;
+                margin-bottom: 2rem;
+                padding-bottom: 0.5rem;
+                font-size: 10pt;
+            }
         }
 
-        .title-block h1 {
-            font-size: 24pt;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
+        /* Screen only header simulation */
+        @media screen {
+            body {
+                padding: 2rem;
+                background: #f0f0f0;
+            }
+
+            .document-container {
+                background: white;
+                padding: 1in;
+                max-width: 8.5in;
+                margin: 0 auto;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
         }
 
-        .title-block .subtitle {
-            font-size: 18pt;
+        /* Title Page */
+        .title-page {
+            text-align: right;
+            page-break-after: always;
+            position: relative;
+            min-height: 9in;
+        }
+
+        .title-top-border {
+            border-top: 6pt solid #000;
+            width: 100%;
             margin-bottom: 2rem;
-            font-weight: normal;
         }
 
-        .meta-info {
-            font-size: 12pt;
-            font-style: italic;
-        }
-
-        /* Headings & Numbering */
-        h1,
-        h2,
-        h3,
-        h4 {
+        h1.main-title {
+            font-size: 28pt;
             font-weight: bold;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            page-break-after: avoid;
+            margin-bottom: 0.5rem;
+            margin-top: 0;
+            line-height: 1.2;
         }
 
-        h2 {
-            counter-reset: subsection;
+        .title-subtext {
             font-size: 14pt;
-            border-bottom: 1px solid #000;
-            padding-bottom: 4px;
-            text-transform: uppercase;
+            margin-bottom: 0.5rem;
         }
 
-        h2::before {
+        .project-name {
+            font-size: 24pt;
+            font-weight: bold;
+            margin-bottom: 4rem;
+        }
+
+        .version-info {
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 4rem;
+        }
+
+        .prepared-by {
+            margin-bottom: 2rem;
+        }
+
+        .info-group {
+            margin-bottom: 1rem;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        .course-info {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            text-align: right;
+        }
+
+        /* Headings */
+        h1.section-header {
+            background-color: #000;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            text-transform: uppercase;
+            /* TOC is all caps, but template sections are Title Case? Re-reading specs. 
+                                          Spec says: "Case: Title Case". Wait, checking visual memory... 
+                                          Actually standard IEEE/SRS templates often use ALL CAPS for Level 1. 
+                                          I will stick to Title Case as per agent report but keep it bold. */
+            font-weight: bold;
+            font-size: 14pt;
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+            counter-reset: subsection;
+        }
+
+        h1.section-header::before {
             counter-increment: section;
             content: counter(section) ". ";
         }
 
-        h3 {
+        h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
             counter-reset: subsubsection;
-            font-size: 12pt;
         }
 
-        h3::before {
+        h2::before {
             counter-increment: subsection;
             content: counter(section) "." counter(subsection) " ";
         }
 
-        h4 {
-            font-size: 11pt;
+        h3 {
+            font-size: 12pt;
+            font-weight: bold;
             font-style: italic;
+            /* Adding italic to differentiate level 3 similar to many specs */
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
         }
 
-        h4::before {
+        h3::before {
             counter-increment: subsubsection;
             content: counter(section) "." counter(subsection) "." counter(subsubsection) " ";
         }
 
         p {
-            margin-bottom: var(--spacing-paragraph);
+            margin-bottom: 1rem;
+            text-align: left;
+            /* Explicit left align as per report */
             text-indent: 0;
         }
 
-        /* Content Styling */
-        .definition-term {
+        ul {
+            list-style-type: disc;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* TOC Styling */
+        .toc {
+            page-break-after: always;
+        }
+
+        .toc-title {
             font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 14pt;
+        }
+
+        .toc-entry-l1 {
+            font-weight: bold;
+            margin-top: 1rem;
+            text-transform: uppercase;
+        }
+
+        .toc-entry-l2 {
+            margin-left: 1.5rem;
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            font-size: 11pt;
         }
 
         code {
             font-family: "Courier New", Courier, monospace;
-            background-color: #f5f5f5;
-            padding: 2px 4px;
-            font-size: 0.9em;
-        }
-
-        /* Print Optimizations */
-        @media print {
-            body {
-                width: 100%;
-                padding: 0;
-                margin: 0;
-            }
-
-            @page {
-                margin: 1in;
-            }
+            background-color: #f0f0f0;
+            padding: 0 4px;
         }
     </style>
 </head>
 
 <body>
+    <div class="document-container">
+        <!-- Title Page -->
+        <div class="title-page">
+            <div class="title-top-border"></div>
 
-    <div class="title-block">
-        <h1>Software Requirements Specification</h1>
-        <div class="subtitle">Ghost in the Bytecode</div>
-        <div class="meta-info">
-            Version 1.0<br>
-            February 3, 2026
+            <h1 class="main-title">SOFTWARE REQUIREMENTS SPECIFICATION</h1>
+            <div class="title-subtext">for</div>
+            <div class="project-name">GHOST IN THE BYTECODE</div>
+
+            <div class="version-info">Version 1.0 approved</div>
+
+            <div class="prepared-by">
+                <div class="label">Prepared by:</div>
+                <div>Rohit Bharadwaj-rvu</div>
+            </div>
+
+            <div class="info-group">
+                <div class="label">Group Name:</div>
+                <div>Ghost Protocol Ops</div>
+            </div>
+
+            <div class="course-info">
+                <div class="info-group">
+                    <span class="label">Instructor:</span> [Instructor Name]<br>
+                    <span class="label">Course:</span> Advanced Software Engineering<br>
+                    <span class="label">Lab Section:</span> [Section]<br>
+                    <span class="label">Teaching Assistant:</span> [TA Name]<br>
+                    <span class="label">Date:</span> February 3, 2026
+                </div>
+            </div>
         </div>
+
+        <!-- TOC (Manual for HTML simplicity, though JS could generate) -->
+        <div class="toc">
+            <div class="toc-title">CONTENTS</div>
+            <div class="toc-entry-l1">1. INTRODUCTION</div>
+            <div class="toc-entry-l2">1.1 DOCUMENT PURPOSE</div>
+            <div class="toc-entry-l2">1.2 PRODUCT SCOPE</div>
+            <div class="toc-entry-l2">1.3 INTENDED AUDIENCE AND DOCUMENT OVERVIEW</div>
+            <div class="toc-entry-l2">1.4 DEFINITIONS, ACRONYMS AND ABBREVIATIONS</div>
+            <div class="toc-entry-l2">1.5 DOCUMENT CONVENTIONS</div>
+            <div class="toc-entry-l2">1.6 REFERENCES AND ACKNOWLEDGMENTS</div>
+
+            <div class="toc-entry-l1">2. OVERALL DESCRIPTION</div>
+            <div class="toc-entry-l2">2.1 PRODUCT OVERVIEW</div>
+            <div class="toc-entry-l2">2.2 PRODUCT FUNCTIONALITY</div>
+            <div class="toc-entry-l2">2.3 DESIGN AND IMPLEMENTATION CONSTRAINTS</div>
+            <div class="toc-entry-l2">2.4 ASSUMPTIONS AND DEPENDENCIES</div>
+
+            <div class="toc-entry-l1">3. SPECIFIC REQUIREMENTS</div>
+            <div class="toc-entry-l2">3.1 EXTERNAL INTERFACE REQUIREMENTS</div>
+            <div class="toc-entry-l2">3.2 FUNCTIONAL REQUIREMENTS</div>
+            <div class="toc-entry-l2">3.3 USE CASE MODEL</div>
+
+            <div class="toc-entry-l1">4. OTHER NON-FUNCTIONAL REQUIREMENTS</div>
+            <div class="toc-entry-l2">4.1 PERFORMANCE REQUIREMENTS</div>
+            <div class="toc-entry-l2">4.2 SAFETY AND SECURITY REQUIREMENTS</div>
+            <div class="toc-entry-l2">4.3 SOFTWARE QUALITY ATTRIBUTES</div>
+
+            <div class="toc-entry-l1">5. OTHER REQUIREMENTS</div>
+
+            <div class="toc-entry-l1">APPENDIX A – DATA DICTIONARY</div>
+        </div>
+
+        <!-- Content -->
+
+        <!-- 1. INTRODUCTION -->
+        <h1 class="section-header">Introduction</h1>
+
+        <h2>Document Purpose</h2>
+        <p>
+            The purpose of this document is to define the software requirements for the "Ghost in the Bytecode" system.
+            It specifies the functional and non-functional requirements to guide development, testing, and validation of
+            the system. This document is intended for developers, security researchers, and stakeholders involved in the
+            project.
+        </p>
+
+        <h2>Product Scope</h2>
+        <p>
+            "Ghost in the Bytecode" is a security-focused tool designed to embed encrypted data, referred to as
+            payloads, into compiled Java class files, known as carriers, without breaking their execution. The system
+            features secure payload injection which embeds data into class files using custom attributes or
+            steganographic techniques such as S-Box smearing. It enforces client-side encryption to ensure the backend
+            never processes plaintext data, adhering to a Zero-Knowledge or Zero-Trust model. The system maintains
+            bytecode integrity so that the modified carrier classes remain valid and executable by the Java Virtual
+            Machine. Furthermore, it provides payload recovery capabilities to extract and decrypt the hidden data from
+            the modified class files.
+        </p>
+
+        <h2>Intended Audience and Document Overview</h2>
+        <p>
+            This document is prepared for a technical audience. Developers will use it to understand the architecture,
+            API, and core logic necessary for implementing the injection and extraction mechanisms. Testers will rely on
+            this specification to validate the security, integrity, and functionality of the system. Security
+            researchers may use this document to analyze the steganographic methods employed by the application.
+        </p>
+
+        <h2>Definitions, Acronyms and Abbreviations</h2>
+        <p>
+            A <b>Carrier</b> is defined as a valid Java class file used to hide the payload. A <b>Payload</b> is the
+            arbitrary data or file that is to be hidden inside the carrier. <b>Injection</b> refers to the process of
+            embedding the payload into the carrier, while <b>Extraction</b> is the process of recovering the payload
+            from the carrier. The <b>JVM</b> stands for the Java Virtual Machine. <b>ASM</b> is the Java bytecode
+            manipulation framework used by the backend. An <b>S-Box</b>, or Substitution Box, is a cryptographic
+            component used in this system as a camouflage for payload data. <b>AES-GCM</b> refers to the Advanced
+            Encryption Standard in Galois/Counter Mode.
+        </p>
+
+        <h2>Document Conventions</h2>
+        <p>
+            Standard document conventions are followed wherein bold text indicates key terms or emphasis. Code font is
+            utilized to indicate file names, API endpoints, or code snippets.
+        </p>
+
+        <h2>References and Acknowledgments</h2>
+        <p>
+            This document references the Java Virtual Machine Specification (JVMS), the ASM Bytecode Manipulation
+            Framework Documentation, and the Web Crypto API Specification.
+        </p>
+
+        <!-- 2. OVERALL DESCRIPTION -->
+        <h1 class="section-header">Overall Description</h1>
+
+        <h2>Product Overview</h2>
+        <p>
+            The system operates as a client-server application. The Frontend, a Web UI, handles user interaction and
+            performs encryption and decryption locally within the browser. The Backend, built as a Spring Boot API,
+            relies on the frontend for secure data handling and performs the complex bytecode manipulation tasks,
+            including Injection, Extraction, and validation.
+        </p>
+
+        <h2>Product Functionality</h2>
+        <p>
+            The product functionality is divided into four main operations. First, the client-side encryption allows the
+            user to provide a payload and a passphrase, which the browser uses to encrypt the payload via AES-256-GCM.
+            Second, the server-side injection accepts the carrier class and the encrypted payload, embeds the payload
+            using the selected mode (Attribute or S-Box), aids in validating the modified class structure and runtime
+            executability, and returns the modified class file to the user. Third, the server-side extraction accepts a
+            modified class file, scans it for hidden payloads using both Attribute and S-Box scanning methods, and
+            returns the raw encrypted payload. Finally, the client-side decryption allows the user to provide the
+            encrypted payload and passphrase, which the browser uses to decrypt and restore the original file.
+        </p>
+
+        <h2>Design and Implementation Constraints</h2>
+        <p>
+            The system faces several constraints. The bytecode size is a primary concern, as the injected payload
+            increases the class file size; large payloads may potentially hit JVM class size limits, although this is
+            rare for typical use cases. Browser compatibility is required, specifically a modern browser that supports
+            the Web Crypto API. Reliable backend operation requires Java 17 or higher.
+        </p>
+
+        <h2>Assumptions and Dependencies</h2>
+        <p>
+            It is assumed that the user provides a valid, non-obfuscated Java class file to serve as a carrier.
+            Furthermore, the security model relies on the assumption that the user will remember the passphrase, as
+            there is no recovery mechanism for lost passphrases.
+        </p>
+
+        <!-- 3. SPECIFIC REQUIREMENTS -->
+        <h1 class="section-header">Specific Requirements</h1>
+
+        <h2>External Interface Requirements</h2>
+
+        <h3>User Interfaces</h3>
+        <p>
+            The user interface is a responsive, dark-themed HTML5 and CSS3 application. It provides drag-and-drop areas
+            for uploading Payload and Carrier files. Configuration options include the selection of Injection Mode, with
+            choices for Standard Attribute or Ghost S-Box, and an input field for the Encryption Passphrase which is
+            masked and toggleable. The interface provides feedback through a terminal-style log output showing status
+            messages such as initiating, encrypting, and success.
+        </p>
+
+        <h3>Hardware Interfaces</h3>
+        <p>
+            The system requires standard web server and client hardware. No specialized hardware interfaces are
+            necessary.
+        </p>
+
+        <h3>Software Interfaces</h3>
+        <p>
+            The backend exposes a REST API for the frontend to consume. This includes a POST endpoint for injection that
+            handles multipart uploads of the carrier, payload, and mode. Another POST endpoint is provided for
+            extraction, handling the multipart upload of the modified class. The system also interacts with the JVM,
+            acting as a custom class loader for validation purposes.
+        </p>
+
+        <h3>Communications Interfaces</h3>
+        <p>
+            Communication occurs over HTTP/1.1 or HTTP/2 over TCP/IP, suitable for both localhost and deployed server
+            environments. JSON is utilized for error messages, while binary streams are used for file transfers.
+        </p>
+
+        <h2>Functional Requirements</h2>
+
+        <h3>Payload Encryption & Decryption</h3>
+        <p>
+            The system is required to encrypt the payload on the client side using AES-256-GCM to ensure
+            confidentiality. The encryption key must be derived from the user passphrase using PBKDF2 with 100,000
+            iterations and SHA-256 hash. A random 16-byte Salt and 12-byte IV must be generated for each encryption
+            operation to ensure uniqueness and security. Crucially, the backend must not receive the plaintext payload
+            or the passphrase at any point.
+        </p>
+
+        <h3>Bytecode Injection</h3>
+        <p>
+            The system must support Attribute Mode, which involves storing data in a custom <code>GhostPayload</code>
+            attribute (FR-05). This attribute must be ignored by standard JVMs during execution but preserved in the
+            file. Additionally, the system must support S-Box Smear Mode, where data is hidden within generated method
+            bytecode that resembles cryptographic S-Box lookups (FR-06). This generated code must be valid bytecode but
+            unreachable or having no side effects on the program logic.
+        </p>
+
+        <h3>Class Validation</h3>
+        <p>
+            All modified classes must pass structural validation using the ASM <code>CheckClassAdapter</code> (FR-07).
+            Furthermore, all modified classes must be loadable by a standard <code>URLClassLoader</code> without
+            triggering any verification errors (FR-08).
+        </p>
+
+        <h3>Payload Extraction</h3>
+        <p>
+            The system must be capable of detecting and extracting payloads hidden via Attribute Mode (FR-09).
+            Similarly, it must be able to detect and extract payloads hidden via S-Box Smear Mode (FR-10). If extraction
+            fails or no payload is found, the system must return an appropriate error message to the user (FR-11).
+        </p>
+
+        <h2>Use Case Model</h2>
+
+        <h3>Use Case #1: Secure Message Transfer</h3>
+        <p>
+            In this use case, the actor acts as the User, named Alice. Her goal is to hide a secret text file inside a
+            calculator app, specifically <code>Calc.class</code>, to send to Bob. The flow begins when Alice opens the
+            Web UI. She drops the secret text file as the Payload and the class file as the Carrier. She enters a strong
+            passphrase and selects the Ghost S-Box mode for stealth. Upon clicking the initiate sequence button, the
+            browser encrypts the secret. The backend then injects the encrypted bytes into the class file. Finally,
+            Alice downloads the modified class file and sends it to Bob.
+        </p>
+
+        <h3>Use Case #2: Message Recovery</h3>
+        <p>
+            In this use case, the actor is the User, named Bob. His goal is to retrieve the secret from the received
+            class file. The flow begins when Bob opens the Web UI and switches to the decode mode. He drops the modified
+            class file into the interface. He enters the shared passphrase provided by Alice. Upon clicking the extract
+            payload button, the backend extracts the encrypted bytes from the file. The browser then decrypts the bytes
+            using the passphrase, and the original secret text file is downloaded to Bob's system.
+        </p>
+
+        <!-- 4. OTHER NON-FUNCTIONAL REQUIREMENTS -->
+        <h1 class="section-header">Other Non-Functional Requirements</h1>
+
+        <h2>Performance Requirements</h2>
+        <p>
+            Injection and extraction operations for typical class files under 100KB and payloads under 10KB should
+            complete in under 2 seconds. In terms of overhead, Attribute Mode increases the file size by the payload
+            size plus a small header. S-Box Mode increases the file size by the payload size plus the code generation
+            overhead, which is approximately 500 to 1000 bytes extra.
+        </p>
+
+        <h2>Safety and Security Requirements</h2>
+        <p>
+            The system adheres to a Zero Knowledge principle, meaning the server has no knowledge of the payload
+            content. Integrity is ensured via AES-GCM tags which prevent tampering with the encrypted payload. Stealth
+            is maintained by ensuring the modified class file remains fully functional and passes standard JVM
+            verification.
+        </p>
+
+        <h2>Software Quality Attributes</h2>
+        <p>
+            Reliability is a key quality attribute, ensuring the system does not corrupt the carrier class logic.
+            Maintainability is achieved by separating the <code>injector</code>, <code>extractor</code>, and
+            <code>api</code> modules for modular development.
+        </p>
+
+        <!-- 5. OTHER REQUIREMENTS -->
+        <h1 class="section-header">Other Requirements</h1>
+        <p>
+            The project is licensed for educational use only. Compliance requirements dictate that users must ensure
+            they have permission to modify the target bytecode before using the system.
+        </p>
+
+        <!-- APPENDIX -->
+        <h1 class="section-header">Appendix A – Data Dictionary</h1>
+        <p>
+            <b>GhostPayload</b> is the name of the custom attribute used in Attribute Mode. An <b>SBox</b> is a lookup
+            table used in symmetric key algorithms, and in this context, we generate fake S-Boxes to store data.
+            <b>classBytes</b> refers to the byte array representing the content of a class file.
+        </p>
     </div>
-
-    <!-- 1. INTRODUCTION -->
-    <h2>Introduction</h2>
-
-    <h3>Document Purpose</h3>
-    <p>
-        The purpose of this document is to define the software requirements for the "Ghost in the Bytecode" system. It
-        specifies the functional and non-functional requirements to guide development, testing, and validation of the
-        system. This document is intended for developers, security researchers, and stakeholders involved in the
-        project.
-    </p>
-
-    <h3>Product Scope</h3>
-    <p>
-        "Ghost in the Bytecode" is a security-focused tool designed to embed encrypted data, referred to as payloads,
-        into compiled Java class files, known as carriers, without breaking their execution. The system features secure
-        payload injection which embeds data into class files using custom attributes or steganographic techniques such
-        as S-Box smearing. It enforces client-side encryption to ensure the backend never processes plaintext data,
-        adhering to a Zero-Knowledge or Zero-Trust model. The system maintains bytecode integrity so that the modified
-        carrier classes remain valid and executable by the Java Virtual Machine. Furthermore, it provides payload
-        recovery capabilities to extract and decrypt the hidden data from the modified class files.
-    </p>
-
-    <h3>Intended Audience and Document Overview</h3>
-    <p>
-        This document is prepared for a technical audience. Developers will use it to understand the architecture, API,
-        and core logic necessary for implementing the injection and extraction mechanisms. Testers will rely on this
-        specification to validate the security, integrity, and functionality of the system. Security researchers may use
-        this document to analyze the steganographic methods employed by the application.
-    </p>
-
-    <h3>Definitions, Acronyms and Abbreviations</h3>
-    <p>
-        A <span class="definition-term">Carrier</span> is defined as a valid Java class file used to hide the payload. A
-        <span class="definition-term">Payload</span> is the arbitrary data or file that is to be hidden inside the
-        carrier. <span class="definition-term">Injection</span> refers to the process of embedding the payload into the
-        carrier, while <span class="definition-term">Extraction</span> is the process of recovering the payload from the
-        carrier. The <span class="definition-term">JVM</span> stands for the Java Virtual Machine. <span
-            class="definition-term">ASM</span> is the Java bytecode manipulation framework used by the backend. An <span
-            class="definition-term">S-Box</span>, or Substitution Box, is a cryptographic component used in this system
-        as a camouflage for payload data. <span class="definition-term">AES-GCM</span> refers to the Advanced Encryption
-        Standard in Galois/Counter Mode.
-    </p>
-
-    <h3>Document Conventions</h3>
-    <p>
-        Standard document conventions are followed wherein bold text indicates key terms or emphasis. Code font is
-        utilized to indicate file names, API endpoints, or code snippets.
-    </p>
-
-    <h3>References and Acknowledgments</h3>
-    <p>
-        This document references the Java Virtual Machine Specification (JVMS), the ASM Bytecode Manipulation Framework
-        Documentation, and the Web Crypto API Specification.
-    </p>
-
-    <!-- 2. OVERALL DESCRIPTION -->
-    <h2>Overall Description</h2>
-
-    <h3>Product Overview</h3>
-    <p>
-        The system operates as a client-server application. The Frontend, a Web UI, handles user interaction and
-        performs encryption and decryption locally within the browser. The Backend, built as a Spring Boot API, relies
-        on the frontend for secure data handling and performs the complex bytecode manipulation tasks, including
-        Injection, Extraction, and validation.
-    </p>
-
-    <h3>Product Functionality</h3>
-    <p>
-        The product functionality is divided into four main operations. First, the client-side encryption allows the
-        user to provide a payload and a passphrase, which the browser uses to encrypt the payload via AES-256-GCM.
-        Second, the server-side injection accepts the carrier class and the encrypted payload, embeds the payload using
-        the selected mode (Attribute or S-Box), aids in validating the modified class structure and runtime
-        executability, and returns the modified class file to the user. Third, the server-side extraction accepts a
-        modified class file, scans it for hidden payloads using both Attribute and S-Box scanning methods, and returns
-        the raw encrypted payload. Finally, the client-side decryption allows the user to provide the encrypted payload
-        and passphrase, which the browser uses to decrypt and restore the original file.
-    </p>
-
-    <h3>Design and Implementation Constraints</h3>
-    <p>
-        The system faces several constraints. The bytecode size is a primary concern, as the injected payload increases
-        the class file size; large payloads may potentially hit JVM class size limits, although this is rare for typical
-        use cases. Browser compatibility is required, specifically a modern browser that supports the Web Crypto API.
-        Reliable backend operation requires Java 17 or higher.
-    </p>
-
-    <h3>Assumptions and Dependencies</h3>
-    <p>
-        It is assumed that the user provides a valid, non-obfuscated Java class file to serve as a carrier. Furthermore,
-        the security model relies on the assumption that the user will remember the passphrase, as there is no recovery
-        mechanism for lost passphrases.
-    </p>
-
-    <!-- 3. SPECIFIC REQUIREMENTS -->
-    <h2>Specific Requirements</h2>
-
-    <h3>External Interface Requirements</h3>
-
-    <h4>User Interfaces</h4>
-    <p>
-        The user interface is a responsive, dark-themed HTML5 and CSS3 application. It provides drag-and-drop areas for
-        uploading Payload and Carrier files. Configuration options include the selection of Injection Mode, with choices
-        for Standard Attribute or Ghost S-Box, and an input field for the Encryption Passphrase which is masked and
-        toggleable. The interface provides feedback through a terminal-style log output showing status messages such as
-        initiating, encrypting, and success.
-    </p>
-
-    <h4>Hardware Interfaces</h4>
-    <p>
-        The system requires standard web server and client hardware. No specialized hardware interfaces are necessary.
-    </p>
-
-    <h4>Software Interfaces</h4>
-    <p>
-        The backend exposes a REST API for the frontend to consume. This includes a POST endpoint for injection that
-        handles multipart uploads of the carrier, payload, and mode. Another POST endpoint is provided for extraction,
-        handling the multipart upload of the modified class. The system also interacts with the JVM, acting as a custom
-        class loader for validation purposes.
-    </p>
-
-    <h4>Communications Interfaces</h4>
-    <p>
-        Communication occurs over HTTP/1.1 or HTTP/2 over TCP/IP, suitable for both localhost and deployed server
-        environments. JSON is utilized for error messages, while binary streams are used for file transfers.
-    </p>
-
-    <h3>Functional Requirements</h3>
-
-    <h4>Payload Encryption & Decryption</h4>
-    <p>
-        The system is required to encrypt the payload on the client side using AES-256-GCM to ensure confidentiality.
-        The encryption key must be derived from the user passphrase using PBKDF2 with 100,000 iterations and SHA-256
-        hash. A random 16-byte Salt and 12-byte IV must be generated for each encryption operation to ensure uniqueness
-        and security. Crucially, the backend must not receive the plaintext payload or the passphrase at any point.
-    </p>
-
-    <h4>Bytecode Injection</h4>
-    <p>
-        The system must support Attribute Mode, which involves storing data in a custom <code>GhostPayload</code>
-        attribute (FR-05). This attribute must be ignored by standard JVMs during execution but preserved in the file.
-        Additionally, the system must support S-Box Smear Mode, where data is hidden within generated method bytecode
-        that resembles cryptographic S-Box lookups (FR-06). This generated code must be valid bytecode but unreachable
-        or having no side effects on the program logic.
-    </p>
-
-    <h4>Class Validation</h4>
-    <p>
-        All modified classes must pass structural validation using the ASM <code>CheckClassAdapter</code> (FR-07).
-        Furthermore, all modified classes must be loadable by a standard <code>URLClassLoader</code> without triggering
-        any verification errors (FR-08).
-    </p>
-
-    <h4>Payload Extraction</h4>
-    <p>
-        The system must be capable of detecting and extracting payloads hidden via Attribute Mode (FR-09). Similarly, it
-        must be able to detect and extract payloads hidden via S-Box Smear Mode (FR-10). If extraction fails or no
-        payload is found, the system must return an appropriate error message to the user (FR-11).
-    </p>
-
-    <h3>Use Case Model</h3>
-
-    <h4>Use Case #1: Secure Message Transfer</h4>
-    <p>
-        In this use case, the actor acts as the User, named Alice. Her goal is to hide a secret text file inside a
-        calculator app, specifically <code>Calc.class</code>, to send to Bob. The flow begins when Alice opens the Web
-        UI. She drops the secret text file as the Payload and the class file as the Carrier. She enters a strong
-        passphrase and selects the Ghost S-Box mode for stealth. Upon clicking the initiate sequence button, the browser
-        encrypts the secret. The backend then injects the encrypted bytes into the class file. Finally, Alice downloads
-        the modified class file and sends it to Bob.
-    </p>
-
-    <h4>Use Case #2: Message Recovery</h4>
-    <p>
-        In this use case, the actor is the User, named Bob. His goal is to retrieve the secret from the received class
-        file. The flow begins when Bob opens the Web UI and switches to the decode mode. He drops the modified class
-        file into the interface. He enters the shared passphrase provided by Alice. Upon clicking the extract payload
-        button, the backend extracts the encrypted bytes from the file. The browser then decrypts the bytes using the
-        passphrase, and the original secret text file is downloaded to Bob's system.
-    </p>
-
-    <!-- 4. OTHER NON-FUNCTIONAL REQUIREMENTS -->
-    <h2>Other Non-Functional Requirements</h2>
-
-    <h3>Performance Requirements</h3>
-    <p>
-        Injection and extraction operations for typical class files under 100KB and payloads under 10KB should complete
-        in under 2 seconds. In terms of overhead, Attribute Mode increases the file size by the payload size plus a
-        small header. S-Box Mode increases the file size by the payload size plus the code generation overhead, which is
-        approximately 500 to 1000 bytes extra.
-    </p>
-
-    <h3>Safety and Security Requirements</h3>
-    <p>
-        The system adheres to a Zero Knowledge principle, meaning the server has no knowledge of the payload content.
-        Integrity is ensured via AES-GCM tags which prevent tampering with the encrypted payload. Stealth is maintained
-        by ensuring the modified class file remains fully functional and passes standard JVM verification.
-    </p>
-
-    <h3>Software Quality Attributes</h3>
-    <p>
-        Reliability is a key quality attribute, ensuring the system does not corrupt the carrier class logic.
-        Maintainability is achieved by separating the <code>injector</code>, <code>extractor</code>, and
-        <code>api</code> modules for modular development.
-    </p>
-
-    <!-- 5. OTHER REQUIREMENTS -->
-    <h2>Other Requirements</h2>
-    <p>
-        The project is licensed for educational use only. Compliance requirements dictate that users must ensure they
-        have permission to modify the target bytecode before using the system.
-    </p>
-
-    <!-- APPENDIX -->
-    <h2>Appendix A – Data Dictionary</h2>
-    <p>
-        <span class="definition-term">GhostPayload</span> is the name of the custom attribute used in Attribute Mode. An
-        <span class="definition-term">SBox</span> is a lookup table used in symmetric key algorithms, and in this
-        context, we generate fake S-Boxes to store data. <span class="definition-term">classBytes</span> refers to the
-        byte array representing the content of a class file.
-    </p>
-
 </body>
 
 </html>
