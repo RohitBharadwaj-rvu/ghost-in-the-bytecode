@@ -160,26 +160,26 @@ classDiagram
 This diagram illustrates the high-level module structure and dependencies within the ByteStego system.
 
 ```mermaid
-componentDiagram
-    component "Web Frontend" as UI
-    component "REST API" as API
+graph TD
+    UI["Web Frontend"]
+    API["REST API"]
     
-    package "ByteStego Backend" {
-        component "SteganographyController" as Controller
-        component "PayloadEmbedder" as Embedder
-        component "PayloadExtractor" as Extractor
-        component "BytecodeValidator" as Validator
-        component "ASM Library" as ASM
-    }
+    subgraph "ByteStego Backend"
+        Controller["SteganographyController"]
+        Embedder["PayloadEmbedder"]
+        Extractor["PayloadExtractor"]
+        Validator["BytecodeValidator"]
+        ASM["ASM Library"]
+    end
 
-    UI --> API : HTTP/JSON
-    API --> Controller : Internal Call
-    Controller --> Embedder : Uses
-    Controller --> Extractor : Uses
-    Embedder --> Validator : Validates Output
-    Embedder --> ASM : Manipulates Bytecode
-    Extractor --> ASM : Parses Bytecode
-    Validator --> ASM : Analyzes Structure
+    UI -->|HTTP/JSON| API
+    API -->|Internal Call| Controller
+    Controller --> Embedder
+    Controller --> Extractor
+    Embedder -->|Validates Output| Validator
+    Embedder -->|Manipulates| ASM
+    Extractor -->|Parses| ASM
+    Validator -->|Analyzes| ASM
 ```
 
 ---
