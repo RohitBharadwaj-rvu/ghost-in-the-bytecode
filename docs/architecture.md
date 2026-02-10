@@ -153,5 +153,92 @@ classDiagram
 | **Validator** | Structural and runtime verification of modified bytecode |
 | **API** | Spring Boot REST interface bridging UI and backend modules |
 
+---
+
+## Component Diagram — Architecture
+
+This diagram illustrates the high-level module structure and dependencies within the ByteStego system.
+
+```mermaid
+componentDiagram
+    component "Web Frontend" as UI
+    component "REST API" as API
+    
+    package "ByteStego Backend" {
+        component "SteganographyController" as Controller
+        component "PayloadEmbedder" as Embedder
+        component "PayloadExtractor" as Extractor
+        component "BytecodeValidator" as Validator
+        component "ASM Library" as ASM
+    }
+
+    UI --> API : HTTP/JSON
+    API --> Controller : Internal Call
+    Controller --> Embedder : Uses
+    Controller --> Extractor : Uses
+    Embedder --> Validator : Validates Output
+    Embedder --> ASM : Manipulates Bytecode
+    Extractor --> ASM : Parses Bytecode
+    Validator --> ASM : Analyzes Structure
+```
+
+---
+
+## State Diagram — Payload Model
+
+This diagram models the lifecycle of a payload as it transitions through the system states.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Plaintext : User Selects File
+    Plaintext --> Encrypted : Client-Side Encryption (AES-GCM)
+    Encrypted --> Embedded : Injection into .class (ByteStego)
+    Embedded --> Extracted : Extraction from .class
+    Extracted --> Decrypted : Client-Side Decryption
+    Decrypted --> [*] : User Download
+    
+    state Embedded {
+        [*] --> ValidatingStructure
+        ValidatingStructure --> ValidatingRuntime : Structure OK
+        ValidatingRuntime --> Ready : Runtime OK
+        ValidatingStructure --> Corrupted : Error
+        ValidatingRuntime --> Corrupted : Error
+    }
+```
+
+---
+
+## Algorithm Flowchart — S-Box Embedding Design
+
+This flowchart details the logic for the stealthy "S-Box Smearing" embedding mode.
+
+```mermaid
+flowchart TD
+    Start([Start Embedding]) --> InputCheck{Valid Input?}
+    InputCheck -- No --> Error([Return Error])
+    InputCheck -- Yes --> ParseClass[Parse .class with ASM]
+    
+    ParseClass --> SelectMode{Mode Selection}
+    
+    SelectMode -- Attribute --> InjectAttr[Inject 'GhostPayload' Attribute]
+    
+    SelectMode -- SBox Smear --> GenSBox[Generate S-Box Int Arrays]
+    GenSBox --> SplitPayload[Split Payload into S-Box Chunks]
+    SplitPayload --> FindClinit[Find <clinit> Method]
+    FindClinit --> InfectClinit[Inject S-Box Initialization Code]
+    InfectClinit --> Verify[Validate Bytecode Structure]
+    
+    InjectAttr --> Verify
+    
+    Verify --> Result{Valid?}
+    Result -- Yes --> WriteClass[Write Modified .class]
+    Result -- No --> Revert[Revert Changes]
+    
+    WriteClass --> End([End])
+    Revert --> Error
+```
+
+---
+
 ## Architectural Constraint
 All embedded data must be **static**, **non-executable**, and **JVM-verifiable**.

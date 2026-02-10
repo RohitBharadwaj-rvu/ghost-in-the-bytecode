@@ -53,7 +53,13 @@ Simply open `frontend/index.html` in any modern web browser.
 
 ## 📐 Architecture Diagrams
 
-See [docs/architecture.md](docs/architecture.md) for UML diagrams (Use Case, Sequence, and Class diagrams) rendered with Mermaid.
+## 📐 Architecture Diagrams
+
+See [docs/architecture.md](docs/architecture.md) for detailed UML diagrams rendered with Mermaid:
+- **Architecture**: Component Diagram & Class Diagram
+- **Model**: Payload Lifecycle State Diagram
+- **Design**: S-Box Embedding Algorithm Flowchart
+- **Interaction**: Use Case & Sequence Diagrams
 
 ---
 
