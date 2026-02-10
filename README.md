@@ -51,6 +51,12 @@ Simply open `frontend/index.html` in any modern web browser.
 
 ---
 
+## 📐 Architecture Diagrams
+
+See [docs/architecture.md](docs/architecture.md) for UML diagrams (Use Case, Sequence, and Class diagrams) rendered with Mermaid.
+
+---
+
 ## 🛡️ Security Model
 
 1. **Confidentiality:** Payloads are encrypted with AES-256-GCM using a key derived via PBKDF2 (100k iterations).
