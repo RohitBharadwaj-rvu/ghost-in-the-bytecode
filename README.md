@@ -1,16 +1,16 @@
-# Ghost in the Bytecode
+# ByteStego
 
-> 👻 **Covert Payload Injection & Encryption for Java Class Files**
+> 🔬 **Steganographic Payload Embedding in JVM Bytecode**
 
-Ghost in the Bytecode is a security-focused tool that allows you to encrypt arbitrary files and embed them inside valid, runnable Java `.class` files. The carrier classes remain fully executable by the JVM, while the encrypted payload remains hidden in a custom class attribute.
+ByteStego is a framework for steganographic embedding of encrypted payloads within structurally valid Java `.class` files. Carrier classes remain fully executable by the JVM, while the encrypted payload is concealed within custom class-level attributes.
 
 ## ✨ Core Features
 
-- 🔒 **Client-Side Encryption:** AES-256-GCM (Web Crypto API). The backend never sees your plaintext or passphrase.
-- 💉 **Custom Attribute Injection:** Payloads are stored in a JVM-compliant `GhostPayload` attribute.
+- 🔒 **Client-Side Encryption:** AES-256-GCM via Web Crypto API. The backend never sees plaintext or passphrase.
+- 💉 **Custom Attribute Embedding:** Payloads are stored in a JVM-compliant custom class attribute.
 - ☕ **Carrier Execution:** Modified classes run normally without JVM verification errors.
-- 🕵️ **Extraction & Recovery:** Dedicated standalone module for safe payload recovery.
-- 🎨 **Modern Web UI:** Dark-themed interface with drag-and-drop support.
+- 🔍 **Extraction & Recovery:** Standalone module for payload recovery and validation.
+- 🎨 **Web Interface:** Dark-themed UI with drag-and-drop support.
 
 ---
 
@@ -42,11 +42,11 @@ Simply open `frontend/index.html` in any modern web browser.
 
 ## 🛠️ Project Structure
 
-- `frontend/`: Web interface, CSS, and `crypto.js` (Web Crypto logic).
+- `frontend/`: Web interface and client-side cryptographic module.
 - `backend/`:
-  - `injector/`: Core logic for bytecode manipulation (ASM-based).
-  - `extractor/`: Standalone logic for payload recovery.
-  - `validator/`: Structural and runtime validation of modified classes.
+  - `injector/`: Bytecode-level payload embedding (ASM-based).
+  - `extractor/`: Standalone payload extraction and recovery.
+  - `validator/`: Structural and runtime bytecode validation.
   - `api/`: Spring Boot REST API for web integration.
 
 ---

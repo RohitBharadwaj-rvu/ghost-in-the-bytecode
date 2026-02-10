@@ -1,7 +1,7 @@
-# System Architecture
+# System Architecture — ByteStego
 
 ## Overview
-The system consists of a web frontend and a backend service responsible for bytecode manipulation.
+ByteStego is a steganographic framework for embedding encrypted payloads within structurally valid JVM bytecode. The system comprises a web-based frontend for client-side encryption and a modular Java backend for bytecode-level payload embedding, extraction, and validation.
 
 ---
 
@@ -13,13 +13,13 @@ graph TB
         User["👤 User"]
     end
 
-    subgraph "Ghost in the Bytecode"
-        UC1["Encrypt Payload (Client-Side)"]
-        UC2["Inject Payload into .class"]
-        UC3["Extract Payload from .class"]
+    subgraph "ByteStego System"
+        UC1["Encrypt Payload (Client-Side AES-256-GCM)"]
+        UC2["Embed Payload into .class File"]
+        UC3["Extract Payload from .class File"]
         UC4["Decrypt Payload (Client-Side)"]
         UC5["Validate Modified Bytecode"]
-        UC6["Select Injection Mode"]
+        UC6["Select Embedding Mode"]
     end
 
     User --> UC1
@@ -33,24 +33,23 @@ graph TB
 
 ---
 
-## Sequence Diagram — Injection Flow
+## Sequence Diagram — Embedding Flow
 
 ```mermaid
 sequenceDiagram
     actor User
     participant UI as Web UI
-    participant Crypto as crypto.js
-    participant API as GhostController
-    participant Injector as GhostPayloadInjector
-    participant Validator as BytecodeValidator
+    participant Crypto as CryptoModule
+    participant API as SteganographyController
+    participant Embedder as PayloadEmbedder
 
     User->>UI: Upload carrier .class + payload file
     UI->>Crypto: Encrypt payload (AES-256-GCM)
     Crypto-->>UI: Encrypted bytes
     UI->>API: POST /inject (carrier, encrypted payload, mode)
-    API->>Injector: inject(classBytes, payload, mode)
-    Injector-->>API: Modified class bytes
-    API-->>UI: Download modified.class
+    API->>Embedder: embed(classBytes, payload, mode)
+    Embedder-->>API: Modified class bytes
+    API-->>UI: Download modified .class
 ```
 
 ## Sequence Diagram — Extraction Flow
@@ -59,9 +58,9 @@ sequenceDiagram
 sequenceDiagram
     actor User
     participant UI as Web UI
-    participant API as GhostController
+    participant API as SteganographyController
     participant Extractor as PayloadExtractor
-    participant Crypto as crypto.js
+    participant Crypto as CryptoModule
 
     User->>UI: Upload modified .class
     UI->>API: POST /extract (modifiedClass)
@@ -78,22 +77,22 @@ sequenceDiagram
 
 ```mermaid
 classDiagram
-    class GhostController {
-        -GhostPayloadInjector injector
+    class SteganographyController {
+        -PayloadEmbedder embedder
         -PayloadExtractor extractor
         +inject(carrier, payload, mode) ResponseEntity
         +extract(modifiedClass) ResponseEntity
     }
 
-    class GhostPayloadInjector {
-        -SBoxPayloadInjector sboxInjector
-        +inject(classBytes, payload) byte[]
-        +inject(classBytes, payload, mode) byte[]
+    class PayloadEmbedder {
+        -SBoxEmbedder sboxEmbedder
+        +embed(classBytes, payload) byte[]
+        +embed(classBytes, payload, mode) byte[]
         +extract(classBytes) byte[]
     }
 
-    class SBoxPayloadInjector {
-        +inject(classBytes, payload) byte[]
+    class SBoxEmbedder {
+        +embed(classBytes, payload) byte[]
     }
 
     class PayloadExtractor {
@@ -112,7 +111,7 @@ classDiagram
         +validateFull(classBytes, className) ValidationResult
     }
 
-    class InjectionMode {
+    class EmbeddingMode {
         <<enumeration>>
         ATTRIBUTE
         SBOX_SMEAR
@@ -133,11 +132,11 @@ classDiagram
         +runtimeValid boolean
     }
 
-    GhostController --> GhostPayloadInjector : uses
-    GhostController --> PayloadExtractor : uses
-    GhostPayloadInjector --> SBoxPayloadInjector : delegates S-Box
-    GhostPayloadInjector --> InjectionMode : selects mode
-    PayloadExtractor --> SBoxPayloadExtractor : delegates S-Box
+    SteganographyController --> PayloadEmbedder : uses
+    SteganographyController --> PayloadExtractor : uses
+    PayloadEmbedder --> SBoxEmbedder : delegates S-Box mode
+    PayloadEmbedder --> EmbeddingMode : selects mode
+    PayloadExtractor --> SBoxPayloadExtractor : delegates S-Box mode
     PayloadExtractor --> ExtractionResult : returns
     BytecodeValidator --> ValidationResult : returns
 ```
@@ -146,24 +145,13 @@ classDiagram
 
 ## Components
 
-### 1. Frontend (Web UI)
-- File upload/download
-- Client-side encryption/decryption
-- Key management (user-supplied)
+| Module | Responsibility |
+|--------|---------------|
+| **Web UI** | File upload/download, client-side AES-256-GCM encryption/decryption |
+| **Embedder** | Bytecode-level payload embedding via ASM framework |
+| **Extractor** | Payload recovery from modified class files |
+| **Validator** | Structural and runtime verification of modified bytecode |
+| **API** | Spring Boot REST interface bridging UI and backend modules |
 
-### 2. Injection Service (Backend)
-- Reads Java `.class` files
-- Injects encrypted payload into class attributes
-- Outputs valid `.class` files
-
-### 3. Extraction Service
-- Reads modified `.class` files
-- Extracts encrypted payload
-- Returns payload bytes
-
-### 4. Validation Module
-- Ensures modified classes still execute
-- Detects corruption or invalid bytecode
-
-## Architectural Principle
-All injected data must be **static**, **non-executable**, and **JVM-verifiable**.
+## Architectural Constraint
+All embedded data must be **static**, **non-executable**, and **JVM-verifiable**.
