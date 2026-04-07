@@ -39,3 +39,6 @@ setup_env.ps1
 # Logs
 *.log
 git_log_*.txt
+
+# Temporary Office Files
+~$*

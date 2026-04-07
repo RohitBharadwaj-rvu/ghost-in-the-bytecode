@@ -14,7 +14,7 @@ sequenceDiagram
     participant S as Server (Spring Boot)
 
     %% Injection Flow
-    rect rgb(200, 220, 240)
+    rect rgba(0, 150, 255, 0.2)
     note right of U: Use Case 1: Secure Message Transfer (Injection)
     U->>B: Upload Carrier (.class) & Payload (File)
     U->>B: Enter Passphrase & Select Injection Mode
@@ -29,7 +29,7 @@ sequenceDiagram
     end
 
     %% Extraction Flow
-    rect rgb(220, 240, 200)
+    rect rgba(100, 255, 150, 0.2)
     note right of U: Use Case 2: Message Recovery (Extraction)
     U->>B: Upload Modified Carrier (.class)
     U->>B: Enter Passphrase
@@ -49,10 +49,10 @@ Since Mermaid does not have a dedicated wireframing tool, standard flow node sha
 
 ```mermaid
 graph TD
-    classDef container fill:#2d3748,stroke:#4a5568,stroke-width:2px,color:#fff;
-    classDef element fill:#4a5568,stroke:#718096,stroke-width:1px,color:#e2e8f0;
-    classDef action fill:#48bb78,stroke:#2f855a,stroke-width:2px,color:#fff;
-    classDef terminal fill:#000,stroke:#39ff14,stroke-width:2px,color:#39ff14;
+    classDef container fill:transparent,stroke:#9ca3af,stroke-width:2px,color:#f3f4f6,stroke-dasharray: 5 5;
+    classDef element fill:#374151,stroke:#6b7280,stroke-width:1px,color:#f9fafb;
+    classDef action fill:#059669,stroke:#047857,stroke-width:2px,color:#ffffff;
+    classDef terminal fill:#111827,stroke:#10b981,stroke-width:2px,color:#10b981;
 
     subgraph Window [Browser Window - Dark Theme SPA]
         Header["<h1/> Ghost in the Bytecode"]:::container
@@ -109,8 +109,8 @@ graph LR
     API -- "Modified Class" --> UI
     API -- "Encrypted Bytes" --> UI
 
-    classDef browser fill:#ebf8ff,stroke:#3182ce,stroke-width:2px;
-    classDef server fill:#f0fff4,stroke:#38a169,stroke-width:2px;
+    classDef browser fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#eff6ff;
+    classDef server fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#ecfdf5;
     
     class Client browser;
     class Backend server;

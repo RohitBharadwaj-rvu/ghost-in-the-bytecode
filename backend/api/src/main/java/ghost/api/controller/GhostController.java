@@ -24,6 +24,11 @@ public class GhostController {
         this.extractor = new PayloadExtractor();
     }
 
+    @GetMapping("/ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
+    }
+
     @PostMapping("/inject")
     public ResponseEntity<byte[]> inject(
             @RequestParam("carrierClass") MultipartFile carrierClass,

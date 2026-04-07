@@ -160,8 +160,11 @@ public class SBoxPayloadExtractor {
         @Override
         public void visitIntInsn(int opcode, int operand) {
             if (opcode == Opcodes.NEWARRAY && operand == Opcodes.T_INT) {
-                // Array size should have been pushed before this
-                // We'll handle this in visitLdcInsn and push constants
+                // arraySize was set by the preceding SIPUSH/BIPUSH/LDC — allocate now
+                if (arraySize > 0) {
+                    currentArray = new int[arraySize];
+                    pendingIndex = -1;
+                }
             } else if (opcode == Opcodes.BIPUSH || opcode == Opcodes.SIPUSH) {
                 handlePushedInt(operand);
             }

@@ -22,6 +22,34 @@ const GhostApp = (function () {
         bindEvents();
         initBackground();
         log('SYSTEM_INIT', 'Ghost Protocol v2.0 initialized...', 'info');
+
+        waitForBackend();
+    }
+
+    async function waitForBackend() {
+        const overlay = document.getElementById('startup-overlay');
+        if (!overlay) return;
+        const statusText = document.getElementById('startup-status');
+        let attempts = 0;
+
+        const poll = async () => {
+            try {
+                attempts++;
+                if (attempts > 3) statusText.textContent = "Starting Spring Boot Context...";
+                if (attempts > 8) statusText.textContent = "Almost there...";
+
+                const res = await fetch(`${API_BASE}/ping`);
+                if (res.ok) {
+                    overlay.classList.add('hidden');
+                    setTimeout(() => overlay.remove(), 600);
+                } else {
+                    setTimeout(poll, 1000);
+                }
+            } catch (e) {
+                setTimeout(poll, 1000);
+            }
+        };
+        poll();
     }
 
     function cacheElements() {
