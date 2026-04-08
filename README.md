@@ -16,29 +16,31 @@ ByteStego is a framework for steganographic embedding of encrypted payloads with
 
 ## 🚀 Getting Started
 
-### 1. Prerequisites
-- **Java 17+** (JDK)
-- **Maven 3.8+**
+The application features a fully unified build system and is containerized for seamless deployment. The frontend UI is cleverly baked directly into the Spring Boot backend during compilation.
 
-### 2. Build the Project
-Clone the repository and build all modules:
+### 🐳 Quick Start (Docker - Recommended)
+The fastest way to run the project on any OS is via Docker Desktop.
 ```bash
-cd backend
+docker-compose up --build -d
+```
+Then simply navigate to `http://localhost:8080` in your browser.
+
+### ☕ Native Execution (Maven)
+If you prefer running without Docker:
+1. Ensure **Java 17+** and **Maven 3.8+** are installed.
+2. Build the unified project (which also embeds the frontend into the Java API):
+```bash
 mvn clean install
 ```
-
-### 3. Run the Backend API
-Start the Spring Boot server:
+3. Start the Spring Boot backend:
 ```bash
-cd api
+cd backend/api
 mvn spring-boot:run
 ```
-The server will start at `http://localhost:8080`.
+4. Navigate to `http://localhost:8080`. *(Windows users can optionally double-click the `StartGhost.bat` shortcut at the root directory).*
 
-### 4. Launch the UI
-Simply open `frontend/index.html` in any modern web browser.
-
----
+### 📊 Code Quality & DevOps
+The deployment pipeline automatically generates **Javadoc**, executes **Checkstyle** (static code analysis), and runs **SpotBugs** (bytecode-level vulnerability scanning) on every build.
 
 ## 🛠️ Project Structure
 

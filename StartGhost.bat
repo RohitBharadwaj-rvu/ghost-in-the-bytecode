@@ -1,4 +1,15 @@
 @echo off
+:: =========================================================================
+:: [DEVOPS UPDATE 2026] 
+:: While this script works great for local dev Windows machines, 
+:: the production-ready way to run this on ANY machine (Mac, Linux, Windows)
+:: is via Docker. Simply run:
+::
+::     docker-compose up -d
+::
+:: This inherently bundles the frontend into the java backend, solving all issues!
+:: =========================================================================
+
 echo Starting Ghost Protocol v2.0 Backend...
 
 :: Check if Maven is available in the current environment

@@ -1,4 +1,7 @@
-package ghost.injector;
+package ghost.api;
+
+import ghost.injector.GhostPayloadInjector;
+import ghost.injector.InjectionMode;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -11,7 +14,7 @@ import java.util.List;
 import java.util.Random;
 
 import ghost.extractor.PayloadExtractor;
-import ghost.extractor.PayloadExtractor.ExtractionResult;
+import ghost.extractor.ExtractionResult;
 
 /**
  * Performance benchmarks comparing Attribute-based injection vs S-Box
@@ -55,16 +58,17 @@ public class PerformanceBenchmarkTest {
         for (int size : PAYLOAD_SIZES) {
             byte[] payload = generatePayload(size);
 
+            GhostPayloadInjector injector = new GhostPayloadInjector();
             // Warmup
             for (int i = 0; i < WARMUP_ITERATIONS; i++) {
-                GhostPayloadInjector.inject(carrierClass, payload, InjectionMode.ATTRIBUTE);
-                GhostPayloadInjector.inject(carrierClass, payload, InjectionMode.SBOX_SMEAR);
+                injector.inject(carrierClass, payload, InjectionMode.ATTRIBUTE);
+                injector.inject(carrierClass, payload, InjectionMode.SBOX_SMEAR);
             }
 
             // Benchmark Attribute mode
             long attrStart = System.nanoTime();
             for (int i = 0; i < BENCHMARK_ITERATIONS; i++) {
-                GhostPayloadInjector.inject(carrierClass, payload, InjectionMode.ATTRIBUTE);
+                injector.inject(carrierClass, payload, InjectionMode.ATTRIBUTE);
             }
             long attrTime = System.nanoTime() - attrStart;
             double attrAvgMs = (attrTime / 1_000_000.0) / BENCHMARK_ITERATIONS;
@@ -72,7 +76,7 @@ public class PerformanceBenchmarkTest {
             // Benchmark S-Box mode
             long sboxStart = System.nanoTime();
             for (int i = 0; i < BENCHMARK_ITERATIONS; i++) {
-                GhostPayloadInjector.inject(carrierClass, payload, InjectionMode.SBOX_SMEAR);
+                injector.inject(carrierClass, payload, InjectionMode.SBOX_SMEAR);
             }
             long sboxTime = System.nanoTime() - sboxStart;
             double sboxAvgMs = (sboxTime / 1_000_000.0) / BENCHMARK_ITERATIONS;
@@ -101,20 +105,23 @@ public class PerformanceBenchmarkTest {
         for (int size : PAYLOAD_SIZES) {
             byte[] payload = generatePayload(size);
 
+            GhostPayloadInjector injector = new GhostPayloadInjector();
             // Prepare injected classes
-            byte[] attrClass = GhostPayloadInjector.inject(carrierClass, payload, InjectionMode.ATTRIBUTE);
-            byte[] sboxClass = GhostPayloadInjector.inject(carrierClass, payload, InjectionMode.SBOX_SMEAR);
+            byte[] attrClass = injector.inject(carrierClass, payload, InjectionMode.ATTRIBUTE);
+            byte[] sboxClass = injector.inject(carrierClass, payload, InjectionMode.SBOX_SMEAR);
+
+            PayloadExtractor extractor = new PayloadExtractor();
 
             // Warmup
             for (int i = 0; i < WARMUP_ITERATIONS; i++) {
-                PayloadExtractor.extract(attrClass);
-                PayloadExtractor.extract(sboxClass);
+                extractor.extract(attrClass);
+                extractor.extract(sboxClass);
             }
 
             // Benchmark Attribute extraction
             long attrStart = System.nanoTime();
             for (int i = 0; i < BENCHMARK_ITERATIONS; i++) {
-                PayloadExtractor.extract(attrClass);
+                extractor.extract(attrClass);
             }
             long attrTime = System.nanoTime() - attrStart;
             double attrAvgMs = (attrTime / 1_000_000.0) / BENCHMARK_ITERATIONS;
@@ -122,7 +129,7 @@ public class PerformanceBenchmarkTest {
             // Benchmark S-Box extraction
             long sboxStart = System.nanoTime();
             for (int i = 0; i < BENCHMARK_ITERATIONS; i++) {
-                PayloadExtractor.extract(sboxClass);
+                extractor.extract(sboxClass);
             }
             long sboxTime = System.nanoTime() - sboxStart;
             double sboxAvgMs = (sboxTime / 1_000_000.0) / BENCHMARK_ITERATIONS;
@@ -151,8 +158,9 @@ public class PerformanceBenchmarkTest {
         for (int size : PAYLOAD_SIZES) {
             byte[] payload = generatePayload(size);
 
-            byte[] attrClass = GhostPayloadInjector.inject(carrierClass, payload, InjectionMode.ATTRIBUTE);
-            byte[] sboxClass = GhostPayloadInjector.inject(carrierClass, payload, InjectionMode.SBOX_SMEAR);
+            GhostPayloadInjector injector = new GhostPayloadInjector();
+            byte[] attrClass = injector.inject(carrierClass, payload, InjectionMode.ATTRIBUTE);
+            byte[] sboxClass = injector.inject(carrierClass, payload, InjectionMode.SBOX_SMEAR);
 
             int originalSize = carrierClass.length;
             int attrSize = attrClass.length;
@@ -182,34 +190,36 @@ public class PerformanceBenchmarkTest {
         for (int size : PAYLOAD_SIZES) {
             byte[] payload = generatePayload(size);
 
+            GhostPayloadInjector injector = new GhostPayloadInjector();
             // Measure injection
             long attrInjectStart = System.nanoTime();
             for (int i = 0; i < 50; i++) {
-                GhostPayloadInjector.inject(carrierClass, payload, InjectionMode.ATTRIBUTE);
+                injector.inject(carrierClass, payload, InjectionMode.ATTRIBUTE);
             }
             double attrInjectMs = (System.nanoTime() - attrInjectStart) / 1_000_000.0 / 50;
 
             long sboxInjectStart = System.nanoTime();
             for (int i = 0; i < 50; i++) {
-                GhostPayloadInjector.inject(carrierClass, payload, InjectionMode.SBOX_SMEAR);
+                injector.inject(carrierClass, payload, InjectionMode.SBOX_SMEAR);
             }
             double sboxInjectMs = (System.nanoTime() - sboxInjectStart) / 1_000_000.0 / 50;
 
             injectionRatios.add(sboxInjectMs / attrInjectMs);
 
             // Measure extraction
-            byte[] attrClass = GhostPayloadInjector.inject(carrierClass, payload, InjectionMode.ATTRIBUTE);
-            byte[] sboxClass = GhostPayloadInjector.inject(carrierClass, payload, InjectionMode.SBOX_SMEAR);
+            byte[] attrClass = injector.inject(carrierClass, payload, InjectionMode.ATTRIBUTE);
+            byte[] sboxClass = injector.inject(carrierClass, payload, InjectionMode.SBOX_SMEAR);
 
+            PayloadExtractor extractor = new PayloadExtractor();
             long attrExtractStart = System.nanoTime();
             for (int i = 0; i < 50; i++) {
-                PayloadExtractor.extract(attrClass);
+                extractor.extract(attrClass);
             }
             double attrExtractMs = (System.nanoTime() - attrExtractStart) / 1_000_000.0 / 50;
 
             long sboxExtractStart = System.nanoTime();
             for (int i = 0; i < 50; i++) {
-                PayloadExtractor.extract(sboxClass);
+                extractor.extract(sboxClass);
             }
             double sboxExtractMs = (System.nanoTime() - sboxExtractStart) / 1_000_000.0 / 50;
 

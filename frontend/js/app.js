@@ -5,8 +5,8 @@
 const GhostApp = (function () {
     'use strict';
 
-    // Configuration
-    const API_BASE = 'http://localhost:8080';
+    // Configuration: Support both file:// local mode and hosted mode
+    const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:8080' : '';
 
     // UI State
     let currentMode = 'inject';
