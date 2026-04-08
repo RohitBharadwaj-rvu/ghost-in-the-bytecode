@@ -1,0 +1,33 @@
+name: Generate and Publish Javadoc
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        cache: 'maven'
+
+    - name: Generate Javadoc
+      run: mvn -B -f backend/pom.xml javadoc:aggregate
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./backend/target/site/apidocs
+        commit_message: "docs(javadoc): Update API documentation [skip ci]"
